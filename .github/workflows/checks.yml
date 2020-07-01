@@ -91,7 +91,6 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: wasm-pack, rust-std
 
       - name: Install node
         uses: actions/setup-node@v1
