@@ -1,20 +1,20 @@
-extern crate wasm_bindgen;
-extern crate web_sys;
 extern crate itertools;
 extern crate rand;
+extern crate wasm_bindgen;
+extern crate web_sys;
 
-#[macro_use] extern crate impl_ops;
+#[macro_use]
+extern crate impl_ops;
 
-use wasm_bindgen::prelude::{Closure, JsValue, wasm_bindgen};
-use wasm_bindgen::{JsCast};
+use wasm_bindgen::prelude::{wasm_bindgen, Closure, JsValue};
+use wasm_bindgen::JsCast;
 
+use std::{cell::RefCell, rc::Rc};
 use web_sys::{console, KeyboardEvent};
-use std::{cell::RefCell, rc::Rc, };
 
-mod vec2;
 mod layout;
+mod vec2;
 use layout::Layout;
-
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -27,9 +27,8 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[derive(Debug)]
 pub struct KeyPress {
     key: String,
-    time: u32
+    time: u32,
 }
-
 
 pub type SharedVec = Rc<RefCell<Box<Vec<KeyPress>>>>;
 
@@ -38,16 +37,19 @@ fn get_time() -> u32 {
     (window.performance().unwrap().now() * 1000.) as u32
 }
 
-fn _log_string(s: &String) {
-    console::log_1(&JsValue::from_str(&s));
+fn _log_string(s: &str) {
+    console::log_1(&JsValue::from_str(s));
 }
-
 
 pub fn draw_layout(layout: &mut Layout) {
     let mut html_str: String = String::from("<div style=\"position: relative\">");
     {
         for body in layout.bodies.iter() {
-            html_str += format!("<div style=\"position: absolute; left: {}px; top: {}px\">{}</div>", body.position.x, body.position.y, body.name).as_str();
+            html_str += format!(
+                "<div style=\"position: absolute; left: {}px; top: {}px\">{}</div>",
+                body.position.x, body.position.y, body.name
+            )
+            .as_str();
         }
         html_str += "</div>";
     }
@@ -61,11 +63,10 @@ pub fn draw_layout(layout: &mut Layout) {
 pub fn gen_interval_closure(vec: SharedVec) -> Closure<dyn std::ops::FnMut()> {
     // let window = web_sys::window().unwrap();
     // let document = window.document().unwrap();
-    let bound_vec = vec.clone();
     let mut layout = Layout::new();
 
     Closure::wrap(Box::new(move || {
-        layout.update(&bound_vec.borrow());
+        layout.update(&vec.borrow());
         draw_layout(&mut layout);
     }))
 }
@@ -73,9 +74,9 @@ pub fn gen_interval_closure(vec: SharedVec) -> Closure<dyn std::ops::FnMut()> {
 pub fn gen_keypress_closure(vec: SharedVec) -> Closure<dyn std::ops::FnMut(KeyboardEvent)> {
     Closure::wrap(Box::new(move |_event: KeyboardEvent| {
         console::log_1(&JsValue::from_str("KB Event"));
-        vec.borrow_mut().push(KeyPress{
+        vec.borrow_mut().push(KeyPress {
             key: _event.key(),
-            time: get_time()
+            time: get_time(),
         });
     }))
 }
@@ -103,16 +104,15 @@ pub fn main_js() -> Result<(), JsValue> {
     let shared_v: SharedVec = Rc::new(RefCell::new(Box::new(vec![])));
 
     // document.body().unwrap().append_child(&document.create_element("div").unwrap());
-    
+
     let interval_closure = gen_interval_closure(shared_v.clone());
     window.set_interval_with_callback_and_timeout_and_arguments_0(
         interval_closure.as_ref().unchecked_ref(),
-        100
+        100,
     )?;
     interval_closure.forget();
 
-
-    let keydown_closure = gen_keypress_closure(shared_v.clone());
+    let keydown_closure = gen_keypress_closure(shared_v);
     window.add_event_listener_with_callback("keydown", keydown_closure.as_ref().unchecked_ref())?;
     keydown_closure.forget();
 
