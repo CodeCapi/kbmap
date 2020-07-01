@@ -1,7 +1,7 @@
 use std::ops;
 use std::ops::Neg;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct Vec2 {
     pub x: f32,
     pub y: f32,

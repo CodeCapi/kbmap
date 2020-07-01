@@ -5,7 +5,7 @@ use rand::prelude::*;
 
 use crate::{vec2::Vec2, KeyPress};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Body {
     pub name: String,
     pub position: Vec2,
@@ -43,7 +43,7 @@ fn repulse_force(body1: &Body, body2: &Body) -> Vec2 {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Layout {
     pub bodies: Vec<Body>,
     name_map: HashMap<String, usize>,
@@ -57,7 +57,7 @@ impl Layout {
         }
     }
 
-    pub fn update(&mut self, keys: &Vec<KeyPress>) {
+    pub fn update(&mut self, keys: &[KeyPress]) {
         self.update_forces(keys);
         self.update_speeds();
         self.update_positions();
@@ -124,7 +124,7 @@ impl Layout {
         }
     }
 
-    fn update_forces_key_attract(&mut self, keys: &Vec<KeyPress>) {
+    fn update_forces_key_attract(&mut self, keys: &[KeyPress]) {
         if keys.len() > 1 {
             for i in 0..(keys.len() - 1) {
                 let key1 = keys.get(i).unwrap();
@@ -150,7 +150,7 @@ impl Layout {
         }
     }
 
-    fn update_forces(&mut self, keys: &Vec<KeyPress>) {
+    fn update_forces(&mut self, keys: &[KeyPress]) {
         for key_press in keys {
             self.try_insert(key_press.key.clone());
         }

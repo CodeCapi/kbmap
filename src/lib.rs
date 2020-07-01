@@ -37,8 +37,8 @@ fn get_time() -> u32 {
     (window.performance().unwrap().now() * 1000.) as u32
 }
 
-fn _log_string(s: &String) {
-    console::log_1(&JsValue::from_str(&s));
+fn _log_string(s: &str) {
+    console::log_1(&JsValue::from_str(s));
 }
 
 pub fn draw_layout(layout: &mut Layout) {
@@ -63,11 +63,10 @@ pub fn draw_layout(layout: &mut Layout) {
 pub fn gen_interval_closure(vec: SharedVec) -> Closure<dyn std::ops::FnMut()> {
     // let window = web_sys::window().unwrap();
     // let document = window.document().unwrap();
-    let bound_vec = vec.clone();
     let mut layout = Layout::new();
 
     Closure::wrap(Box::new(move || {
-        layout.update(&bound_vec.borrow());
+        layout.update(&vec.borrow());
         draw_layout(&mut layout);
     }))
 }
@@ -113,7 +112,7 @@ pub fn main_js() -> Result<(), JsValue> {
     )?;
     interval_closure.forget();
 
-    let keydown_closure = gen_keypress_closure(shared_v.clone());
+    let keydown_closure = gen_keypress_closure(shared_v);
     window.add_event_listener_with_callback("keydown", keydown_closure.as_ref().unchecked_ref())?;
     keydown_closure.forget();
 
