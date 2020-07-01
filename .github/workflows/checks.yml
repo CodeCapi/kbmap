@@ -6,7 +6,7 @@
 
 on: [push, pull_request]
 
-name: Quickstart
+name: Checks
 
 jobs:
   check:
@@ -91,7 +91,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          # components: rustfmt, clippy
+          components: wasm-pack, rust-std
 
       - name: Install node
         uses: actions/setup-node@v1
